@@ -1,0 +1,25 @@
+:local arpList [/ip arp find]
+:local reportFile "arp-ping-report.txt"
+
+/file remove $reportFile
+:local report "ARP Ping Report (10 pings per IP):\n"
+
+:foreach i in=$arpList do={
+    :local ip [/ip arp get $i address]
+    :local successCount [/ping $ip count=10]
+    :local status
+    :if ($successCount > 0) do={
+        :set status "Reachable ($successCount/10)"
+    } else={
+        :set status "Unreachable"
+    }
+    :set report "$report\n$ip - $status"
+}
+
+
+/file set $reportFile contents=$report
+
+
+
+
+/system script add name=arpPingReport source=":local arpList [/ip arp find]; :local reportFile \"arp-ping-report.txt\"; /file remove \$reportFile; :local report \"ARP Ping Report (10 pings per IP):\\n\"; :foreach i in=\$arpList do={ :local ip [/ip arp get \$i address]; :local successCount [/ping \$ip count=10]; :local status; :if (\$successCount > 0) do={ :set status \"Reachable (\$successCount/10)\" } else={ :set status \"Unreachable\" }; :set report \"\$report\\n\$ip - \$status\" }; /file set \$reportFile contents=\$report;"
